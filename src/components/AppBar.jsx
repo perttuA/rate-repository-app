@@ -1,10 +1,13 @@
 import React from 'react';
 import Constants from 'expo-constants';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Link } from 'react-router-native';
+import { useQuery } from '@apollo/client';
 
 import Text from './Text';
 import theme from '../theme';
+import { AUTHORIZED_USER } from '../graphql/queries';
+import useSignOut from '../hooks/useSignOut';
 
 const styles = StyleSheet.create({
   container: {
@@ -12,6 +15,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.backgroundAppBar,
     paddingHorizontal: 10,
     flexGrow: 0,
+    flexShrink: 0
   },
   item: {
     alignItems: 'center',
@@ -30,11 +34,29 @@ const AppBarTab = ({ to, label }) => {
   );
 };
 
+const SignOutTab = () => {
+  const [signOut] = useSignOut();
+
+  return (
+    <Pressable onPress={signOut} style={styles.item}>
+      <Text color={'title'} fontSize={'title'} fontWeight={'bold'}>Sign Out</Text>
+    </Pressable>
+  );
+};
+
 const AppBar = () => {
+  const { data } = useQuery(AUTHORIZED_USER, {
+    fetchPolicy: 'cache-and-network'
+  });
+
   return (
     <ScrollView horizontal style={styles.container}>
       <AppBarTab to='/' label='Repositories' />
-      <AppBarTab to='/signin' label='Sign In' />
+      {
+        data && data.authorizedUser
+          ? <SignOutTab />
+          : <AppBarTab to='/signin' label='Sign In' />
+      }
     </ScrollView>
   );
 };

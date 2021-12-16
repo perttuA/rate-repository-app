@@ -6,6 +6,8 @@ import * as yup from 'yup';
 import Text from './Text';
 import FormikTextInput from './FormikTextInput';
 import theme from '../theme';
+import useSignIn from '../hooks/useSignIn';
+import { useHistory } from 'react-router-native';
 
 const initialValues = {
   username: '',
@@ -48,8 +50,16 @@ const SignInForm = ({ onSubmit }) => {
 };
 
 const SignIn = () => {
-  const onSubmit = (values) => {
-    console.log(values);
+  const [signIn] = useSignIn();
+  const history = useHistory();
+
+  const onSubmit = async ({ username, password }) => {
+    try {
+      await signIn({ username, password });
+      history.push('/');
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   return (
